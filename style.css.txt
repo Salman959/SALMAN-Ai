@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600;700&family=Inter:wght@300;400;600&display=swap');
+
+body { 
+    font-family: 'Inter', 'Hind Siliguri', sans-serif; 
+    background-color: #ffffff; 
+    color: #1f2937; 
+}
+
+.chat-container { 
+    height: calc(100vh - 240px); 
+    overflow-y: auto; 
+    scroll-behavior: smooth; 
+}
+
+.message-user { 
+    background: #2563eb; 
+    color: white; 
+    border-radius: 20px 20px 0 20px; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+}
+
+.message-ai { 
+    background: #f9fafb; 
+    color: #1f2937; 
+    border-radius: 20px 20px 20px 0; 
+    border: 1px solid #e5e7eb; 
+}
+
+/* Code Block Styling */
+.code-wrapper { 
+    position: relative; 
+    margin: 15px 0; 
+    background: #1e293b; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    border: 1px solid #334155; 
+}
+
+.code-header { 
+    background: #0f172a; 
+    color: #94a3b8; 
+    padding: 8px 15px; 
+    font-size: 11px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid #334155; 
+}
+
+.code-block { 
+    color: #f8fafc; 
+    padding: 1.2rem; 
+    font-family: 'Consolas', monospace; 
+    overflow-x: auto; 
+    font-size: 13px; 
+    line-height: 1.6; 
+    white-space: pre; 
+}
+
+.action-btns { 
+    display: flex; 
+    gap: 6px; 
+}
+
+.action-btn { 
+    background: #334155; 
+    color: white; 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 10px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    border: none; 
+    display: flex; 
+    align-items: center; 
+    gap: 4px; 
+}
+
+.action-btn:hover { background: #2563eb; }
+.preview-btn { background: #059669; }
+
+/* Preview Modal */
+#previewModal { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.8); 
+    z-index: 200; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px; 
+}
+
+.preview-content { 
+    background: white; 
+    width: 100%; 
+    max-width: 900px; 
+    height: 80vh; 
+    border-radius: 15px; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+}
+
+.loader { 
+    border: 3px solid #f3f3f3; 
+    border-top: 3px solid #2563eb; 
+    border-radius: 50%; 
+    width: 24px; 
+    height: 24px; 
+    animation: spin 1s linear infinite; 
+    display: none; 
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

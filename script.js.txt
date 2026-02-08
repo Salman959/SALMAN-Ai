@@ -1,0 +1,182 @@
+const API_KEY = "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";
+let currentModel = "google/gemini-2.0-flash-001";
+let allModelsData = [];
+let uploadedFiles = [];
+
+const textarea = document.getElementById('userInput');
+
+// Auto-resize textarea
+textarea.addEventListener('input', () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+});
+
+// Universal Copy Function (Supports Android, Telegram, Browser)
+async function copyCode(id) {
+    const code = document.getElementById(id).innerText;
+    const btn = document.querySelector(`[onclick="copyCode('${id}')"]`);
+    
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(code);
+        } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = code;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        }
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy', 2000);
+    } catch (err) {
+        alert("Copy failed. Please try manually.");
+    }
+}
+
+// Preview Code Logic
+function previewCode(id) {
+    const code = document.getElementById(id).innerText;
+    const modal = document.getElementById('previewModal');
+    const iframe = document.getElementById('previewFrame');
+    modal.style.display = 'flex';
+    
+    const blob = new Blob([code], { type: 'text/html' });
+    iframe.src = URL.createObjectURL(blob);
+}
+
+function closePreview() {
+    document.getElementById('previewModal').style.display = 'none';
+}
+
+// Handle File Upload & Preview Tags
+function handleFileUpload(input, type) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadedFiles.push({ type: type, data: e.target.result, name: file.name });
+        const tag = document.createElement('div');
+        tag.className = "bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px]";
+        tag.innerHTML = file.name.substring(0, 10) + '...';
+        document.getElementById('previewArea').appendChild(tag);
+    };
+    reader.readAsDataURL(file);
+}
+
+// Fetch and Open Model Modal
+async function openModelModal() {
+    document.getElementById('modelModal').classList.remove('hidden');
+    if (allModelsData.length === 0) {
+        try {
+            const res = await fetch("https://openrouter.ai/api/v1/models");
+            const json = await res.json();
+            allModelsData = json.data;
+            displayModels(allModelsData);
+        } catch (e) {
+            document.getElementById('modelListGrid').innerHTML = "Failed to load models.";
+        }
+    }
+}
+
+function displayModels(models) {
+    document.getElementById('modelListGrid').innerHTML = models.map(m => `
+        <div class="p-3 border rounded-xl hover:bg-blue-50 cursor-pointer transition shadow-sm" onclick="selectModel('${m.id}', '${m.name}')">
+            <h3 class="font-bold text-gray-800 text-xs">${m.name}</h3>
+            <p class="text-[8px] text-gray-400 truncate">${m.id}</p>
+        </div>
+    `).join('');
+}
+
+function filterModels() {
+    const term = document.getElementById('modelSearch').value.toLowerCase();
+    const filtered = allModelsData.filter(m => m.name.toLowerCase().includes(term) || m.id.toLowerCase().includes(term));
+    displayModels(filtered);
+}
+
+function selectModel(id, name) {
+    currentModel = id;
+    document.getElementById('activeModelName').innerText = name;
+    closeModelModal();
+}
+
+function closeModelModal() {
+    document.getElementById('modelModal').classList.add('hidden');
+}
+
+// Send Message to API
+async function sendMessage() {
+    const text = textarea.value.trim();
+    if (!text && uploadedFiles.length === 0) return;
+
+    appendMessage('user', text);
+    textarea.value = ''; textarea.style.height = 'auto';
+    document.getElementById('previewArea').innerHTML = '';
+    document.getElementById('loader').style.display = 'block';
+
+    let contentArr = [{ type: "text", text: text }];
+    uploadedFiles.forEach(f => { 
+        if(f.type === 'image') contentArr.push({type: "image_url", image_url: {url: f.data}}); 
+    });
+
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: { 
+                "Authorization": `Bearer ${API_KEY}`, 
+                "Content-Type": "application/json",
+                "X-Title": "SALMAN Ai"
+            },
+            body: JSON.stringify({ model: currentModel, messages: [{ role: "user", content: contentArr }] })
+        });
+        const data = await response.json();
+        appendMessage('ai', data.choices[0].message.content);
+    } catch (e) { 
+        appendMessage('ai', "Error connecting to server. Please check your connection."); 
+    } finally { 
+        document.getElementById('loader').style.display = 'none'; 
+        uploadedFiles = []; 
+    }
+}
+
+// Message Rendering with Code Formatting
+function appendMessage(role, content) {
+    const chatBox = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    div.className = `p-4 max-w-[92%] ${role === 'user' ? 'message-user ml-auto' : 'message-ai mr-auto'}`;
+    
+    let formatted = content.replace(/```(\w+)?([\s\S]*?)```/g, (match, lang, code) => {
+        const id = 'code_' + Math.random().toString(36).substr(2, 9);
+        const language = (lang || 'txt').toLowerCase();
+        const isPreviewable = ['html', 'javascript', 'js', 'css'].includes(language);
+
+        return `
+        <div class="code-wrapper">
+            <div class="code-header">
+                <span>${language.toUpperCase()}</span>
+                <div class="action-btns">
+                    ${isPreviewable ? `<button class="action-btn preview-btn" onclick="previewCode('${id}')"><i class="fas fa-play"></i> Preview</button>` : ''}
+                    <button class="action-btn" onclick="copyCode('${id}')"><i class="fas fa-copy"></i> Copy</button>
+                    <button class="action-btn" onclick="downloadCode('${id}', '${language}')"><i class="fas fa-download"></i></button>
+                </div>
+            </div>
+            <div class="code-block" id="${id}">${code.trim()}</div>
+        </div>`;
+    });
+
+    div.innerHTML = formatted.replace(/\n/g, '<br>');
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+window.downloadCode = (id, lang) => {
+    const code = document.getElementById(id).innerText;
+    const blob = new Blob([code], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `salman_code_${Date.now()}.${lang}`;
+    a.click();
+};

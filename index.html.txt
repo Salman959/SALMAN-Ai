@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SALMAN Ai - Professional Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white sticky top-0 z-50 p-4 flex justify-between items-center shadow-sm border-b">
+        <div class="flex items-center space-x-3">
+            <img src="https://i.ibb.co.com/YF9WKP4M/20260208-065456.png" alt="Logo" class="w-10 h-10 rounded-full object-cover">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">SALMAN <span class="text-blue-600">Ai</span></h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <div class="hidden md:block text-right mr-2">
+                <span id="activeModelName" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Gemini 2.0 Flash</span>
+            </div>
+            <button onclick="openModelModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition flex items-center shadow-md">
+                <i class="fas fa-th-large mr-1"></i> Models
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Chat -->
+    <main class="flex-grow container mx-auto max-w-4xl p-4">
+        <div id="chatBox" class="chat-container space-y-6 p-4">
+            <div class="message-ai p-4 max-w-[85%] shadow-sm">
+                স্বাগতম! আমি <b>SALMAN Ai</b>। কোড লেখা, ছবি এনালাইসিস এবং সব ভাষার সাপোর্টে আমি দক্ষ।
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 mt-4">
+            <div id="previewArea" class="flex flex-wrap gap-2 mb-2"></div>
+            <div class="flex items-center space-x-3">
+                <div class="flex space-x-3 border-r pr-3">
+                    <label class="cursor-pointer text-gray-400 hover:text-blue-600">
+                        <i class="fas fa-image text-xl"></i>
+                        <input type="file" id="imgInput" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'image')">
+                    </label>
+                    <label class="cursor-pointer text-gray-400 hover:text-blue-600">
+                        <i class="fas fa-paperclip text-xl"></i>
+                        <input type="file" id="fileInput" accept="*" class="hidden" onchange="handleFileUpload(this, 'file')">
+                    </label>
+                </div>
+                <textarea id="userInput" rows="1" class="flex-grow bg-transparent border-none rounded-xl p-2 outline-none resize-none text-gray-800" placeholder="Ask anything..."></textarea>
+                <div id="loader" class="loader mr-2"></div>
+                <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 flex items-center justify-center rounded-full transition shadow-lg">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Code Preview Modal -->
+    <div id="previewModal">
+        <div class="preview-content flex flex-col">
+            <div class="bg-gray-100 p-3 flex justify-between items-center">
+                <span class="font-bold text-gray-700"><i class="fas fa-play-circle mr-2"></i>Live App Preview</span>
+                <button onclick="closePreview()" class="text-red-500 font-bold px-3 text-xl">&times;</button>
+            </div>
+            <iframe id="previewFrame" class="w-full flex-grow border-none"></iframe>
+        </div>
+    </div>
+
+    <!-- Model Modal -->
+    <div id="modelModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold">Select AI Model</h2>
+                <button onclick="closeModelModal()" class="text-gray-400 text-2xl">&times;</button>
+            </div>
+            <div class="p-4"><input type="text" id="modelSearch" oninput="filterModels()" placeholder="Search model..." class="w-full p-3 rounded-xl border"></div>
+            <div id="modelListGrid" class="flex-grow overflow-y-auto p-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="p-6 text-center text-gray-400 text-sm bg-white border-t mt-auto">
+        <p>© 2026, made with Developer by <span class="text-blue-600 font-bold">SALMAN BD</span></p>
+    </footer>
+
+    <!-- External JS -->
+    <script src="script.js"></script>
+</body>
+</html>
